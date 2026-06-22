@@ -1,0 +1,97 @@
+SAST-SCAN Copilot Chat Prompts
+================================
+
+Prompt 1: Best Full-Scan Prompt
+-------------------------------
+
+Run a complete SAST scan on all repository folders attached to this chat context.
+
+Scope:
+- Scan every attached repo/folder and all relevant source files.
+- Treat each attached folder as a separate repository unless clearly part of the same mono-repo.
+- Ignore default irrelevant folders such as tests, tst, mocks, generated code, vendor/dependencies, build output, cache folders, and non-web-accessible batch folders unless they are security-relevant or runtime-reachable.
+- Review security-relevant config files including dependency manifests, Dockerfiles, Kubernetes, Terraform, Helm, CI/CD workflows, OpenAPI/Swagger, GraphQL schemas, auth config, and environment templates.
+
+Task:
+- Identify source-code vulnerabilities.
+- Triage every candidate finding.
+- Mark actual exploitable issues as Confirmed Issue.
+- Mark suspicious but unproven items as Needs Validation.
+- Mark non-exploitable candidates as Dismissed False Positive.
+- Mark excluded/noisy/out-of-scope items as Ignored Noise.
+- Deduplicate findings by root cause.
+
+For each confirmed issue, include:
+- Severity
+- Confidence
+- Repository/folder
+- File path and line/function
+- Vulnerability category
+- Source-to-sink flow
+- Why it is exploitable
+- Impact
+- False-positive checks performed
+- Recommended fix
+- Safe validation steps
+
+Do not modify any source code. Produce only the SAST scan report.
+
+
+Prompt 2: Stronger Prompt for Deeper Triage
+------------------------------------------
+
+Act as a senior application security engineer and perform a deep SAST review of all attached repository folders.
+
+Do not stop at keyword matches. For every candidate vulnerability, validate whether it is actually exploitable by checking:
+- entrypoint reachability
+- attacker-controlled input source
+- source-to-sink dataflow
+- authentication checks
+- authorization checks
+- validation/sanitization/encoding
+- framework protections
+- environment/config assumptions
+- production reachability
+- whether the file is test/generated/vendor/batch-only code
+
+Classify every candidate into one of these buckets:
+1. Confirmed Issue — code evidence proves the vulnerability is exploitable.
+2. Needs Validation — suspicious but one or more runtime/deployment facts are missing.
+3. Dismissed False Positive — code controls prove it is not exploitable.
+4. Ignored Noise — test/vendor/generated/duplicate/out-of-scope/excluded item.
+
+Scan for:
+- authentication flaws
+- authorization flaws / IDOR / BOLA / BFLA
+- SQL/NoSQL/command/template/header injection
+- XSS
+- SSRF
+- path traversal and unsafe file handling
+- insecure deserialization
+- XXE
+- hardcoded secrets
+- weak crypto
+- insecure JWT/session/cookie handling
+- mass assignment
+- business logic flaws
+- webhook/signature validation issues
+- GraphQL/API security issues
+- dependency/config/cloud/CI/CD security risks
+
+Return a structured report with:
+- executive summary
+- scope and exclusions
+- findings summary by severity
+- confirmed issues
+- needs validation
+- dismissed false positives
+- ignored noise
+- recommended next steps
+
+Do not edit code or run destructive commands.
+
+
+Prompt 3: Short Prompt
+----------------------
+
+Run the SAST-SCAN agent on all attached repo folders. Find and triage vulnerabilities. Mark real issues as Confirmed Issue, uncertain items as Needs Validation, non-exploitable items as Dismissed False Positive, and noisy/excluded items as Ignored Noise. Do not modify code. Return a structured SAST report with evidence, source-to-sink flow, severity, confidence, impact, false-positive reasoning, and remediation.
